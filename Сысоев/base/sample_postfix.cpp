@@ -1,11 +1,15 @@
 ﻿#include <iostream>
 #include <string>
+
 #include "postfix.h"
+
+#include "stack.h"
 
 using namespace std;
 
 int main()
 {
+
   string expression;
   TPostfix postfix;
   double res;
@@ -19,6 +23,9 @@ int main()
   cout << "Постфиксная форма: " << postfix.GetPostfix() << endl;
   res = postfix.Calculate();
   cout << res << endl;
+
+  int t = 10;
+  TStack v;
 
   return 0;
 }
