@@ -1,20 +1,22 @@
-﻿//#ifndef __STACK_H__
-//#define __STACK_H__
+﻿#ifndef __STACK_H__
+#define __STACK_H__
 
 const int MaxStackSize = 100;
 
+
+//Первый вошел - последний вышел
 template <class Type>
 class TStack{
-  Type *pMem;
-  int size;
-  int top;
+	Type *pMem;
+	int size;
+	int top;
 public:
 	TStack(int _size): size(_size), top(-1){
-		if (size < 1 || size > MaxStackSize) {
+		if (size < 1 || (size > MaxStackSize)) {
 			throw size;
 		}
 		pMem = new Type[size];
-	 }
+	}
 	bool IsEmpty() {
 		 return (top == -1);
 	}
@@ -22,16 +24,16 @@ public:
 		return (top == size - 1);
 	}
 	Type pop() {
-		return mem[t--];
+		return pMem[top--];
 	}
 	void push(Type v) {
 		if (IsFull()) {
 			return;
 		}
-		return (pMem[++top] = v);
+		pMem[++top] = v;
 	}
 	~TStack(){
 		delete [] pMem;
 	}
 };
-//#endif
+#endif
