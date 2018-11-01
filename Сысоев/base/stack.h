@@ -17,6 +17,13 @@ public:
 		}
 		pMem = new Type[size];
 	}
+	TStack(TStack& c): size(c.size),top(c.top) {
+		pMem = new Type[size];
+		for (size_t i = 0; i < size; i++) {
+			pMem[i] = c.pMem[i];
+		}
+	}
+
 	bool IsEmpty() {
 		 return (top == -1);
 	}
@@ -31,6 +38,44 @@ public:
 			return;
 		}
 		pMem[++top] = v;
+	}
+	int Size() {
+		return size;
+	}
+	int Top() {
+		return top;
+	}
+
+	TStack<Type>& operator=(TStack<Type> &c) {
+		if (size != c.size) {
+			size = c.size;
+			delete[] pMem;
+			pMem = new Type[size];
+		}
+		top = c.top;
+		for (size_t i = 0; i < size; i++) {
+			pMem[i] = c.pMem[i];
+		}
+		return (*this);
+	}
+
+	bool operator==(const TStack<Type> &c) {
+		if (size != c.size) {
+			return false;
+		}
+		if (top != c.top) {
+			return false;
+		}
+		for (size_t i = 0; i < size; i++) {
+			if (pMem[i] != c.pMem[i]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool operator!=(const TStack<Type> &c) {
+		return !(this == c);
 	}
 	~TStack(){
 		delete [] pMem;

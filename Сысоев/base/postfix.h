@@ -3,201 +3,242 @@
 
 #include <string>
 #include "stack.h"
-#include <vector>
 
 using namespace std;
 
-class TPostfix{
+class TPostfix {
 	string infix;
 	string postfix;
-
-	size_t getPriority(char c) {
-		switch (c) {
-		case '*':
-		case '/':
-			return 2;
-		case '+':
-		case '-':
-			return 1;
-		default:
-			return 0;
-		}
-	}
-	struct sInstructions {
-		double *instruction;
-		size_t *priority;
-	};
+	TStack<string> _T;
 
 	string convertString(string source) {
-		string temp = "";
-		size_t len = source.length();
-		for (size_t i = 0; i < len; i++) {
+
+		for (size_t i = 0; i < source.length(); i++) {
 			switch (source[i]) {
 			case ' ':
+				source.erase(i, 1);
 				continue;
 			case '-':
-				temp += '+';
+				source.replace(i++, 1, "+-");
+			}
+		}
+		return source;
+	}
+	double decodeVal(string value) {
+
+		double div = 1;
+		double result = 0;
+		bool negative = false;
+
+		const int sta = (int)('0');
+		const int end = (int)('9');
+		const int exc_1 = (int)('.');
+		const int exc_2 = (int)('-');
+
+		for (auto c : value) {
+
+			int ch = (int)c;
+			switch (ch) {
+			case exc_1:
+				div = 0.1;
+				continue;
+			case exc_2:
+				negative = !negative;
+				break;
 			default:
-				temp += source[i];
+				if (ch >= sta && ch <= end) {
+					if (div > 0.5) {
+						result *= 10;
+					}
+					result += (ch - sta)*div;
+				}
+			}
+			if (div < 1) {
+				div *= 0.1;
+			}
+		}
+		if (negative) {
+			result *= -1;
+		}
+		return result;
+	}
+	string getVal(string& source, size_t start) {
+
+		string val;
+		const int sta = (int)('0');
+		const int end = (int)('9');
+		const int exc_1 = (int)('.');
+		const int exc_2 = (int)('-');
+		const int exc_3 = (int)('x');
+
+		for (; start < source.length();) {
+			int c = (int)source[start];
+			switch (c) {
+			default:
+				if (c < sta || end < c) { return val; }
+			case exc_1:
+			case exc_2:
+			case exc_3:
+				val += source[start];
+				source.erase(start, 1);
+			}
+		}
+		return val;
+	}
+	void ToPostfixIteration(string source) {
+		TStack<string> _N(100);
+		TStack<char> _O(100);
+
+		char locType = '\0';
+		string result;
+
+		size_t locPos;
+		size_t locMin = 0;
+
+		bool flag = true;
+		while (flag) {
+			flag = false;
+			for (int i = 0; i < source.length(); i++) {
+				if (source[i] == '(') {
+					flag = true;
+					for (size_t offset = 0, j = i + 1; j < source.length(); j++) {
+						if (source[j] == '(') {
+							offset++;
+							continue;
+						}
+						if (source[j] == ')') {
+							string h = source.substr(offset + i + 1, j - i - offset - 1);
+							ToPostfixIteration(h);
+							source.replace(offset + i, j - i - offset + 1, "x");
+							break;
+						}
+					}
+					i = -1;
+				}
+			}
+		}
+		string base = source;
+		while (locMin < 10) {
+			locMin = 10;
+			for (size_t i = 0; i < base.length(); i++) {
+				switch (base[i]) {
+				case '+':
+					if (1 < locMin) {
+						locMin = 1;
+						locPos = i;
+					}
+					break;
+				case '*':
+				case '/':
+					if (2 < locMin) {
+						locMin = 2;
+						locPos = i;
+					}
+					break;
+				}
+			}
+			if (locMin < 10) {
+				_O.push(base[locPos]);
+				base.erase(locPos, 1);
+			}
+		}
+
+		while (source.length() > 0) {
+			for (int i = 0; i < source.length(); i++) {
+				char ch = source[i];
+
+				switch (ch) {
+				case '*':
+				case '/':
+				case '+':
+					locType = ch;
+					locPos = i;
+					continue;
+				default:
+					_N.push(getVal(source, i));
+					if (!_O.IsEmpty()) {
+						char lastO = _O.pop();
+						if (locType == lastO) {
+							if (!_N.IsEmpty()) {
+								result += _N.pop() + ' ';
+							}
+							if (!_N.IsEmpty()) {
+								result += _N.pop();
+							}
+							result += lastO;
+							source.erase(locPos, 1);
+						}
+						else {
+							_O.push(lastO);
+						}
+					}
+					else {
+						result += _N.pop();
+						break;
+					}
+					i = -1;
+					continue;
+				}
+			}
+		}
+		_T.push(result);
+	}
+
+public:
+	TPostfix(string base) : _T(100), infix(convertString(base)) {
+		postfix = ToPostfix(infix);
+	}
+	string GetInfix() { return infix; }
+	string GetPostfix() { return postfix; }
+	string ToPostfix(string source) {
+
+		ToPostfixIteration(source);
+		string temp = _T.pop();
+		while (!(_T.IsEmpty())) {
+			for (int i = temp.length(); i >= 0; --i) {
+				if (temp[i] == 'x') {
+					temp.erase(i, 1);
+					string h = _T.pop();
+					temp.insert(i, h);
+					i = temp.length() - 1;
+				}
 			}
 		}
 		return temp;
 	}
-	size_t iCounter;
-	struct instruction {
-		size_t pri; // 0 - число; >0 - приоритет операции
-		double val; // X - число; 1 = +, 2 = *, 3 = /
-	};
-	double decodeVal(string v) {
-		size_t len = v.length();
-		size_t next = 1;
-		double div = 0.1;
-		double value = 0;
-		double temp;
-		for (auto c : v) {
-			temp = 0;
-			switch (c) {
-			case '-': value *= -1; break;
-			case '.': div *= 0.1; break;
-			case '1': temp = 1;	break;
-			case '2': temp = 2;	break;
-			case '3': temp = 3;	break;
-			case '4': temp = 4;	break;
-			case '5': temp = 5;	break;
-			case '6': temp = 6;	break;
-			case '7': temp = 7;	break;
-			case '8': temp = 8;	break;
-			case '9': temp = 9;	break;
-			case '0': temp = 0;	break;
-			default: continue;
-			}
-			value += temp * (next *= 10)*div;
-			if (div*next < 1) {
-				div *= 0.1;
-			}
-		}
-		return value;
-	}
-	instruction* stack;
-	
-	void splitOperations(string source) {
-		iCounter = 0;
-
-		size_t Priority = 0;
-		size_t len = source.length();
-		stack = new instruction[len];
-		size_t i = 0;
-		string val("");
-		while (i < len) {
-			char c = source[i++];
-			switch (c) {
-			case '(':
-				if (val != "") {
-					stack[iCounter++] = { 0, decodeVal(val) };
-				}
-				Priority += 2;
-				val = "";
-				continue;
-			case ')':
-				if (val != "") {
-					stack[iCounter++] = { 0, decodeVal(val) };
-				}
-				Priority -= 2;
-				val = "";
-				continue;
-			case '+':
-				if (val != "") {
-					stack[iCounter++] = { 0, decodeVal(val) };
-				}
-				stack[iCounter++] = { 1 + Priority, 1 };
-				val = "";
-				continue;
-			case '*':
-				if (val != "") {
-					stack[iCounter++] = { 0, decodeVal(val) };
-				}
-				stack[iCounter++] = { 2 + Priority, 2 };
-				val = "";
-				continue;
-			case '/':
-				if (val != "") {
-					stack[iCounter++] = { 0, decodeVal(val) };
-				}
-				stack[iCounter++] = { 2 + Priority, 3 };
-				val = "";
-				continue;
-			default:
-				val += c;
-			}
-		}
-		stack[iCounter++] = { 0, decodeVal(val) };
-	}
-	double calc() {
-		size_t lMaxPri;
-		size_t lMaxPriInd;
+	double Calculate(string source = "\0") { // Ввод переменных, вычисление по постфиксной форме
 		
-		while (true) {
-			lMaxPri = 0;
-
-			for (size_t i = 0; i < iCounter; i++) {
-				if (stack[i].pri > lMaxPri) {
-					lMaxPri = stack[i].pri;
-					lMaxPriInd = i;
-				}
-			}
-			if (lMaxPri != 0) {
-				switch ((int)stack[lMaxPriInd].val) {
-				case 1:
-					stack[lMaxPriInd - 1].val += stack[lMaxPriInd + 1].val;
-					break;
-				case 2:
-					stack[lMaxPriInd - 1].val *= stack[lMaxPriInd + 1].val;
-					break;
-				case 3:
-					stack[lMaxPriInd - 1].val /= stack[lMaxPriInd + 1].val;
-					break;
-				}
-				stack[lMaxPriInd].pri = 0;
-				stack[lMaxPriInd].val = 0;
-				stack[lMaxPriInd + 1].val = 0;
-				
-				iCounter -= 2;
-
-				instruction* tStack;
-				tStack = new instruction[iCounter];
-
-				for (size_t i = 0, j = 0; i < iCounter + 2; i++) {
-					if (stack[i].pri > 0 || stack[i].val > 0) {
-						tStack[j++] = stack[i];
-					}
-				}
-				
-				delete[] stack;
-				stack = new instruction[iCounter];
-				for (size_t i = 0; i < iCounter; i++) {
-					stack[i] = tStack[i];
-				}
-				delete[] tStack;
-			}
-			else {
-				return stack[0].val;
-				//все операции 
-			}
+		TStack<double> _D(100);
+		if (source == "\0") {
+			source = postfix;
 		}
+		for (int i = 0; i < source.length(); i++) {
+			switch (source[i]) {
+			default: {
+				_D.push(decodeVal(getVal(source, i)));
+				i = -1;
+				continue;
+			}
+			case ' ': {
+				break;
+			}
+			case '+': {
+				_D.push(_D.pop() + _D.pop());
+				break; 
+			}
+			case '*': {
+				_D.push(_D.pop() * _D.pop());
+				break;
+			}
+			case '/': {
+				_D.push(_D.pop() / _D.pop());
+				break;
+			}
+			}
+			source.erase(0, 1);
+			i = -1;
+		}
+		return _D.pop();
 	}
-	
-public:
-	TPostfix(string base){
-		infix = convertString(base);
-		splitOperations(infix);
- 		double t = calc();
-	}
-	string GetInfix() { return infix; }
-	string GetPostfix() { return postfix; }
-	string ToPostfix();
-	double Calculate(); // Ввод переменных, вычисление по постфиксной форме
 };
-
 #endif
-//(1+2)/(3+4*6.7)-5.3*4.4
-//1 2+ 3 4 6.7*+/ 5.3 4.4* -
