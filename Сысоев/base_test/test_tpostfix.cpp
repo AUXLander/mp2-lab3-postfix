@@ -72,3 +72,14 @@ TEST(TPostfix, can_reset_expression) {
 TEST(TPostfix, throw_if_expression_has_non_number_member) {
 	ASSERT_ANY_THROW(TPostfix a("5 + 4 - 3 + a"));
 }
+
+TEST(TPostfix, exeption) {
+	TPostfix a("1+2/4/5-5");
+	EXPECT_EQ("1 2 4 5*/ -5++", a.GetPostfix());
+	EXPECT_EQ(-3.9000000000000004, a.Calculate());// Есть некоторая погрешность
+}
+
+TEST(TPostfix, exeption_add) {
+	TPostfix a("100/2/2/5/5");
+	EXPECT_EQ(1, a.Calculate());
+}

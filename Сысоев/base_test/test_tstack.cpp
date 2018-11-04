@@ -13,26 +13,26 @@ TEST(TStack, can_not_create_stack_with_too_large_length){
 TEST(TStack, can_return_last_elem_of_stack) {
 	TStack<int> a(5);
 	for (int i = 0; i < 5; i++) {
-		a.push(i);
+		a.Push(i);
 	}
-	EXPECT_EQ(4, a.pop());
+	EXPECT_EQ(4, a.Pop());
 }
 
 TEST(TStack, can_push_elem_in_stack) {
 	TStack<int> a(1);
-	ASSERT_NO_THROW(a.push(10));
+	ASSERT_NO_THROW(a.Push(10));
 }
 TEST(TStack, can_pop_elem_of_stack) {
 	TStack<int> a(1);
-	a.push(10);
-	EXPECT_EQ(10, a.pop());
+	a.Push(10);
+	EXPECT_EQ(10, a.Pop());
 }
 
 TEST(TStack, method_pop_delete_elem_of_stack) {
 	TStack<int> a(5);
-	a.push(5);
-	a.pop();
-	EXPECT_NE(5, a.pop());
+	a.Push(5);
+	a.Pop();
+	EXPECT_NE(5, a.Pop());
 }
 
 TEST(TStack, can_check_stack_for_empty) {
@@ -43,33 +43,33 @@ TEST(TStack, can_check_stack_for_empty) {
 TEST(TStack, can_check_stack_for_full) {
 	TStack<int> a(5);
 	while (!a.IsFull()) {
-		a.push(5);
+		a.Push(5);
 	}	
 	EXPECT_TRUE(a.IsFull());
 }
 
 TEST(TStack, can_create_copied_stack) {
 	TStack<int> a(5);
-	a.push(5);
+	a.Push(5);
 	TStack<int> b(a);
 	EXPECT_EQ(a, b);
 }
 
 TEST(TStack, can_compare_two_stacks) {
 	TStack<int> a(5);
-	a.push(5);
+	a.Push(5);
 	TStack<int> b(a);
 	EXPECT_TRUE( (a == b) );
 }
 
 TEST(TStack, two_stacks_are_not_equal) {
 	TStack<int> a(5), b(5);
-	a.push(5);
+	a.Push(5);
 	EXPECT_NE(a, b);
 }
 TEST(TStack, can_assign_stack) {
 	TStack<int> a(1), b(1);
-	a.push(5);
+	a.Push(5);
 	ASSERT_NO_THROW(b = a);
 }
 TEST(TStack, assign_operator_change_stack_size) {
@@ -80,7 +80,7 @@ TEST(TStack, assign_operator_change_stack_size) {
 TEST(TStack, assign_operator_change_stack_top) {
 	TStack<int> a(5), b(10);
 	while (!a.IsFull()) {
-		a.push(5);
+		a.Push(5);
 	}
 	b = a;
 	EXPECT_NE(-1, b.Top());

@@ -54,6 +54,7 @@ class TPostfix {
 				break;
 			}
 		}
+		
 		return source;
 	}
 	double decodeVal(string value) {
@@ -186,6 +187,10 @@ class TPostfix {
 					char tr = O.Pop();
 					char td = tempO[tempO.length() - 1];
 					if (td == ' ' || td == c || ((td == '*' || td == '/') && (tr == '*' || tr == '/'))) {
+
+						if (tr == td && tr == '/') {
+							tempO[tempO.length() - 1] = '*';
+						}
 
 						if (!N.IsEmpty()) {
 							result += ' ' + N.Pop();
