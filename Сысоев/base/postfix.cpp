@@ -241,7 +241,7 @@ void TPostfix::ToPostfixIteration(TStack<string>& _T, string source) {
 	result += tempO;
 	_T.Push(result);
 }
-string TPostfix::ToPostfix(string source = "\0") {
+string TPostfix::ToPostfix(string source) {
 	if (source == "\0") {
 		source = infix;
 	}
@@ -278,7 +278,7 @@ string TPostfix::ToPostfix(string source = "\0") {
 	temp = trimString(temp);
 	return temp;
 }
-double TPostfix::Calculate(string source = "\0") { // Ввод переменных, вычисление по постфиксной форме
+double TPostfix::Calculate(string source) { // Ввод переменных, вычисление по постфиксной форме
 	TStack<double> _D(100);
 	if (source == "\0") {
 		source = postfix;
