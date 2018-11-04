@@ -173,7 +173,7 @@ class TPostfix {
 				}
 			}
 			if (last != '\0') {
-				O.push(last);
+				O.Push(last);
 				base.erase(lastPos, 1);
 			}
 		}
@@ -181,21 +181,21 @@ class TPostfix {
 		for (int i = 0; i < source.length(); i++) {
 			char c = source[i];
 			if (c == '+' || c == '*' || c == '/') {
-				if (c == O.getTop()) {
+				if (c == O.GetTop()) {
 					
-					char tr = O.pop();
+					char tr = O.Pop();
 					char td = tempO[tempO.length() - 1];
 					if (td == ' ' || td == c || ((td == '*' || td == '/') && (tr == '*' || tr == '/'))) {
 
 						if (!N.IsEmpty()) {
-							result += ' ' + N.pop();
+							result += ' ' + N.Pop();
 						}
 
 						tempO += tr;
 					}
 					else {
 						if (!N.IsEmpty()) {
-							result += ' ' + N.pop();
+							result += ' ' + N.Pop();
 						}
 						//reverse(tempO.begin(), tempO.end());
 						result += tempO;
@@ -207,20 +207,20 @@ class TPostfix {
 				}
 				else {
 					if (!N.IsEmpty()) {
-						result += ' ' + N.pop();
+						result += ' ' + N.Pop();
 					}
 				}
 			}
 			else {
-				N.push(getVal(source, i));
+				N.Push(getVal(source, i));
 				i = -1;
 			}
 		}
 		if (!N.IsEmpty()) {
-			result += ' ' + N.pop();
+			result += ' ' + N.Pop();
 		}
 		result += tempO;
- 		_T.push(result);
+ 		_T.Push(result);
 	}
 public:
 	TPostfix(string base = ""): _T(100) {
@@ -246,7 +246,7 @@ public:
 		}
 
 		ToPostfixIteration(source);
-		string temp = _T.pop();
+		string temp = _T.Pop();
 		while (!(_T.IsEmpty())) {
 			for (int i = temp.length(); i >= 0; --i) {
 				if (temp[i] == ' ') {
@@ -261,7 +261,7 @@ public:
 				}
 				if (temp[i] == 'x') {
 					temp.erase(i, 1);
-					string h = _T.pop();
+					string h = _T.Pop();
 					temp.insert(i, h);
 					i = temp.length() - 1;
 				}
@@ -278,7 +278,7 @@ public:
 		for (int i = 0; i < source.length(); i++) {
 			switch (source[i]) {
 			default: {
-				_D.push(decodeVal(getVal(source, i)));
+				_D.Push(decodeVal(getVal(source, i)));
 				i = -1;
 				continue;
 			}
@@ -286,32 +286,32 @@ public:
 				break;
 			}
 			case '+': {
-				_D.push(_D.pop() + _D.pop());
+				_D.Push(_D.Pop() + _D.Pop());
 				break;
 			}
 			case '*': {
-				_D.push(_D.pop() * _D.pop());
+				_D.Push(_D.Pop() * _D.Pop());
 				break;
 			}
 			case '/': {
-				double temp = _D.pop();
+				double temp = _D.Pop();
 				if (temp == 0) {
 					throw temp;
 				}
-				_D.push(_D.pop() / temp);
+				_D.Push(_D.Pop() / temp);
 				break;
 			}
 			}
 			source.erase(0, 1);
 			i = -1;
 		}
-		return _D.pop();
+		return _D.Pop();
 	}
 	void SetInfix(string base) {
 		infix = convertString(base);
 		postfix = ToPostfix();
 		while (!_T.IsEmpty()) {
-			_T.pop();
+			_T.Pop();
 		}
 	}
 };

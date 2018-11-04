@@ -30,10 +30,10 @@ public:
 	bool IsFull() {
 		return (top == size - 1);
 	}
-	Type pop() {
+	Type Pop() {
 		return pMem[top--];
 	}
-	void push(Type v) {
+	void Push(Type v) {
 		if (IsFull()) {
 			return;
 		}
@@ -45,7 +45,7 @@ public:
 	int Top() {
 		return top;
 	}
-	Type getTop() {
+	Type GetTop() {
 		return pMem[top];
 	}
 	TStack& operator=(TStack &c) {
