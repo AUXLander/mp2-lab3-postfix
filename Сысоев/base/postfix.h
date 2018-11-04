@@ -150,6 +150,35 @@ class TPostfix {
 				}
 			}
 		}
+
+		for (int i = 0; i < source.length(); i++) {
+			char c = source[i];
+			if (c == '/') {
+
+				size_t sta;
+				size_t end;
+
+				for (sta = i; sta > 0; sta--) {
+					if (source[sta] == '*' || source[sta] == '+') {
+						sta++;
+						break;
+					}
+				}
+				for (end = i; end < source.length(); end++) {
+					if (source[end] == '*' || source[end] == '+') {
+						break;
+					}
+				}
+				if (sta == 0 && end == source.length()) {
+					break;
+				}
+				string h = source.substr(sta, end - sta);
+				ToPostfixIteration(h);
+				source.replace(sta, end - sta, "x");
+				i = -1;
+			}
+		}
+
 		string base = source;
 		while (base.length() > 0) {
 			last = '\0';
@@ -186,11 +215,7 @@ class TPostfix {
 					
 					char tr = O.Pop();
 					char td = tempO[tempO.length() - 1];
-					if (td == ' ' || td == c || ((td == '*' || td == '/') && (tr == '*' || tr == '/'))) {
-
-						if (tr == td && tr == '/') {
-							tempO[tempO.length() - 1] = '*';
-						}
+					if (td == ' ' || td == c && (td == '*' || td == '+')) {
 
 						if (!N.IsEmpty()) {
 							result += ' ' + N.Pop();
@@ -202,9 +227,7 @@ class TPostfix {
 						if (!N.IsEmpty()) {
 							result += ' ' + N.Pop();
 						}
-						//reverse(tempO.begin(), tempO.end());
 						result += tempO;
-						//result += ' ' + getVal(source, i + 1);
 						tempO = tr;
 					}
 					source.erase(i, 1);
