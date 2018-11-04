@@ -54,7 +54,7 @@ TEST(TStack, can_create_copied_stack) {
 	TStack<int> b(a);
 	EXPECT_EQ(a, b);
 }
-/*
+
 TEST(TStack, can_compare_two_stacks) {
 	TStack<int> a(5);
 	a.push(5);
@@ -90,4 +90,3 @@ TEST(TStack, two_different_stacks_have_different_memories) {
 	a = b;
 	EXPECT_NE(&a, &b);
 }
-*/

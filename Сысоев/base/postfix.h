@@ -10,16 +10,48 @@ class TPostfix {
 	string infix;
 	string postfix;
 	TStack<string> _T;
+	string trimString(string source) {
+		if (source.length() < 2) {
+			return source;
+		}
+		if (source[0] == ' ') {
+			source.erase(0, 1);
+		}
+		if (source[source.length() - 1] == ' '){
+			source.erase(source.length() - 1, 1);
+		}
 
+		for (int i = 0; i < source.length(); i++) {
+			char c = source[i];
+			if (c == ' ') {
+				if (i < source.length() - 1) {
+					char _c = source[i + 1];
+					if (_c == '+' || _c == '/' || _c == '*') {
+						source.erase(i, 1);
+						i--;
+					}
+				}
+			}
+		}
+
+		return source;
+	}
 	string convertString(string source) {
-
 		for (size_t i = 0; i < source.length(); i++) {
 			switch (source[i]) {
 			case ' ':
 				source.erase(i, 1);
+				i--;
 				continue;
 			case '-':
-				source.replace(i++, 1, "+-");
+				source.replace(i, 1, "+-");
+				i++;
+				continue;
+			default:
+				if ((int)source[i] >= (int)'a' && (int)source[i] <= (int)'z') {
+					throw source[i];
+				}
+				break;
 			}
 		}
 		return source;
@@ -46,6 +78,7 @@ class TPostfix {
 				negative = !negative;
 				break;
 			default:
+				
 				if (ch >= sta && ch <= end) {
 					if (div > 0.5) {
 						result *= 10;
@@ -63,7 +96,6 @@ class TPostfix {
 		return result;
 	}
 	string getVal(string& source, size_t start) {
-
 		string val;
 		const int sta = (int)('0');
 		const int end = (int)('9');
@@ -71,131 +103,162 @@ class TPostfix {
 		const int exc_2 = (int)('-');
 		const int exc_3 = (int)('x');
 
-		for (; start < source.length();) {
-			int c = (int)source[start];
+		for (int i = 0; start + i < source.length();) {
+			int c = (int)source[start + i];
 			switch (c) {
+			case '+':
+			case '*':
+			case '/':
+				if (val.length() == 0) {
+					i++;
+					continue;
+				}
 			default:
 				if (c < sta || end < c) { return val; }
 			case exc_1:
 			case exc_2:
 			case exc_3:
-				val += source[start];
-				source.erase(start, 1);
+				val += source[start + i];
+				source.erase(start + i, 1);
 			}
 		}
 		return val;
 	}
 	void ToPostfixIteration(string source) {
-		TStack<string> _N(100);
-		TStack<char> _O(100);
+		TStack<char> O(100);
+		TStack<string> N(100);
+		
+		string result = "";
+		char last = '\0';
+		size_t lastPos;
 
-		char locType = '\0';
-		string result;
-
-		size_t locPos;
-		size_t locMin = 0;
-
-		bool flag = true;
-		while (flag) {
-			flag = false;
-			for (int i = 0; i < source.length(); i++) {
-				if (source[i] == '(') {
-					flag = true;
-					for (size_t offset = 0, j = i + 1; j < source.length(); j++) {
-						if (source[j] == '(') {
-							offset++;
-							continue;
-						}
-						if (source[j] == ')') {
-							string h = source.substr(offset + i + 1, j - i - offset - 1);
-							ToPostfixIteration(h);
-							source.replace(offset + i, j - i - offset + 1, "x");
-							break;
-						}
+		for (int i = 0; i < source.length(); i++) {
+			char c = source[i];
+			if (c == '(') {
+				for (size_t j = i, off = 0; j < source.length(); j++) {
+					char _c = source[j];
+					if (_c == '(') {
+						off++;
 					}
-					i = -1;
+					else if (_c == ')') {
+						string h = source.substr(i + off, j - i - off);
+						ToPostfixIteration(h);
+						source.replace(i + off - 1, j - i - off + 2, "x");
+						i= -1;
+					}
 				}
 			}
 		}
 		string base = source;
-		while (locMin < 10) {
-			locMin = 10;
-			for (size_t i = 0; i < base.length(); i++) {
-				switch (base[i]) {
+		while (base.length() > 0) {
+			last = '\0';
+			for (int i = 0; i < base.length(); i++) {
+				switch (char c = base[i]) {
 				case '+':
-					if (1 < locMin) {
-						locMin = 1;
-						locPos = i;
+					if (last == '\0' || last == '*' || last == '/') {
+						last = c;
+						lastPos = i;
 					}
 					break;
 				case '*':
 				case '/':
-					if (2 < locMin) {
-						locMin = 2;
-						locPos = i;
+					if (last == '\0') {
+						last = c;
+						lastPos = i;
 					}
 					break;
+				default:
+					base.erase(i, 1);
+					i--;
 				}
 			}
-			if (locMin < 10) {
-				_O.push(base[locPos]);
-				base.erase(locPos, 1);
+			if (last != '\0') {
+				O.push(last);
+				base.erase(lastPos, 1);
 			}
 		}
+		string tempO = " ";
+		for (int i = 0; i < source.length(); i++) {
+			char c = source[i];
+			if (c == '+' || c == '*' || c == '/') {
+				if (c == O.getTop()) {
+					
+					char tr = O.pop();
+					char td = tempO[tempO.length() - 1];
+					if (td == ' ' || td == c || ((td == '*' || td == '/') && (tr == '*' || tr == '/'))) {
 
-		while (source.length() > 0) {
-			for (int i = 0; i < source.length(); i++) {
-				char ch = source[i];
+						if (!N.IsEmpty()) {
+							result += ' ' + N.pop();
+						}
 
-				switch (ch) {
-				case '*':
-				case '/':
-				case '+':
-					locType = ch;
-					locPos = i;
-					continue;
-				default:
-					_N.push(getVal(source, i));
-					if (!_O.IsEmpty()) {
-						char lastO = _O.pop();
-						if (locType == lastO) {
-							if (!_N.IsEmpty()) {
-								result += _N.pop() + ' ';
-							}
-							if (!_N.IsEmpty()) {
-								result += _N.pop();
-							}
-							result += lastO;
-							source.erase(locPos, 1);
-						}
-						else {
-							_O.push(lastO);
-						}
+						tempO += tr;
 					}
 					else {
-						result += _N.pop();
-						break;
+						if (!N.IsEmpty()) {
+							result += ' ' + N.pop();
+						}
+						//reverse(tempO.begin(), tempO.end());
+						result += tempO;
+						//result += ' ' + getVal(source, i + 1);
+						tempO = tr;
 					}
-					i = -1;
-					continue;
+					source.erase(i, 1);
+					i--;// = -1;
+				}
+				else {
+					if (!N.IsEmpty()) {
+						result += ' ' + N.pop();
+					}
 				}
 			}
+			else {
+				N.push(getVal(source, i));
+				i = -1;
+			}
 		}
-		_T.push(result);
+		if (!N.IsEmpty()) {
+			result += ' ' + N.pop();
+		}
+		result += tempO;
+ 		_T.push(result);
 	}
-
 public:
-	TPostfix(string base) : _T(100), infix(convertString(base)) {
-		postfix = ToPostfix(infix);
+	TPostfix(string base = ""): _T(100) {
+		infix = convertString(base);
+		postfix = ToPostfix();
+	}
+	TPostfix(TPostfix& c) : _T(100) {
+		infix = c.infix;
+		postfix = ToPostfix();
 	}
 	string GetInfix() { return infix; }
 	string GetPostfix() { return postfix; }
-	string ToPostfix(string source) {
+	string ToPostfix(string source = "\0") {
+		if (source == "\0") {
+			source = infix;
+		}
+		else {
+			source = convertString(source);
+		}
+		
+		if (source.length() < 1) {
+			return source;
+		}
 
 		ToPostfixIteration(source);
 		string temp = _T.pop();
 		while (!(_T.IsEmpty())) {
 			for (int i = temp.length(); i >= 0; --i) {
+				if (temp[i] == ' ') {
+					if (i + 1 == temp.length()) {
+						temp.erase(i, 1);
+					}
+					else {
+						if (temp[i + 1] == ' ' || temp[i + 1] == '+' || temp[i + 1] == '/' || temp[i + 1] == '*') {
+							temp.erase(i, 1);
+						}
+					}
+				}
 				if (temp[i] == 'x') {
 					temp.erase(i, 1);
 					string h = _T.pop();
@@ -204,10 +267,10 @@ public:
 				}
 			}
 		}
+		temp = trimString(temp);
 		return temp;
 	}
 	double Calculate(string source = "\0") { // Ввод переменных, вычисление по постфиксной форме
-		
 		TStack<double> _D(100);
 		if (source == "\0") {
 			source = postfix;
@@ -224,14 +287,18 @@ public:
 			}
 			case '+': {
 				_D.push(_D.pop() + _D.pop());
-				break; 
+				break;
 			}
 			case '*': {
 				_D.push(_D.pop() * _D.pop());
 				break;
 			}
 			case '/': {
-				_D.push(_D.pop() / _D.pop());
+				double temp = _D.pop();
+				if (temp == 0) {
+					throw temp;
+				}
+				_D.push(_D.pop() / temp);
 				break;
 			}
 			}
@@ -239,6 +306,13 @@ public:
 			i = -1;
 		}
 		return _D.pop();
+	}
+	void SetInfix(string base) {
+		infix = convertString(base);
+		postfix = ToPostfix();
+		while (!_T.IsEmpty()) {
+			_T.pop();
+		}
 	}
 };
 #endif

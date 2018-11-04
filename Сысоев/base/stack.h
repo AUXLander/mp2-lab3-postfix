@@ -11,10 +11,11 @@ class TStack{
 	int size;
 	int top;
 public:
-	TStack(int _size): size(_size), top(-1){
+	TStack(int _size): size(_size){
 		if (size < 1 || (size > MaxStackSize)) {
 			throw size;
 		}
+		top = -1;
 		pMem = new Type[size];
 	}
 	TStack(TStack& c): size(c.size),top(c.top) {
@@ -23,7 +24,6 @@ public:
 			pMem[i] = c.pMem[i];
 		}
 	}
-
 	bool IsEmpty() {
 		 return (top == -1);
 	}
@@ -45,8 +45,10 @@ public:
 	int Top() {
 		return top;
 	}
-
-	TStack<Type>& operator=(TStack<Type> &c) {
+	Type getTop() {
+		return pMem[top];
+	}
+	TStack& operator=(TStack &c) {
 		if (size != c.size) {
 			size = c.size;
 			delete[] pMem;
@@ -58,8 +60,7 @@ public:
 		}
 		return (*this);
 	}
-
-	bool operator==(const TStack<Type> &c) {
+	bool operator==(const TStack &c) const {
 		if (size != c.size) {
 			return false;
 		}
@@ -73,9 +74,8 @@ public:
 		}
 		return true;
 	}
-
-	bool operator!=(const TStack<Type> &c) {
-		return !(this == c);
+	bool operator!=(const TStack &c) const {
+		return !(*this == c);
 	}
 	~TStack(){
 		delete [] pMem;
